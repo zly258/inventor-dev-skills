@@ -1,188 +1,141 @@
-# Inventor Dev Skills
+<h1 align="center">Inventor Dev Skills</h1>
 
-A practical skill library for Autodesk Inventor secondary development with C#.
+<p align="center">Modular agent skill library for Autodesk Inventor C# in-process Add-In development.</p>
 
-The repository is intentionally focused on **in-process Inventor Add-In development**: project setup, Add-In lifecycle, COM interoperability, modeling, assemblies, drawings, dimensions, annotations, BOM/iProperties, Ribbon UI, deployment, import/export, performance, and troubleshooting.
+<p align="center">
+  <a href="./README.md">English</a> | <a href="./README.zh-CN.md">简体中文</a>
+</p>
 
-It does **not** include MCP servers, standalone automation EXEs, or AI chat/workflow architecture.
+<p align="center">
+  <img src="https://img.shields.io/badge/C%23-.NET%208%20%2F%20.NET%204.8-3776AB?style=flat-square" alt="C# .NET 8 and .NET 4.8"> <img src="https://img.shields.io/badge/Autodesk%20Inventor-Windows%20x64-4B5563?style=flat-square" alt="Autodesk Inventor on Windows x64"> <a href="./SKILL.md"><img src="https://img.shields.io/badge/Skills-1%20Master%20%2B%2020%20Focused-4F46E5?style=flat-square" alt="1 Master Skill and 20 Focused Skills"></a> <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-22C55E?style=flat-square" alt="License: Apache 2.0"></a>
+</p>
 
-## Why this repository exists
+Inventor Dev Skills is a structured collection of implementation rules for **in-process Autodesk Inventor C# Add-In development**. It turns recurring Inventor failure modes—wrong target frameworks, `Any CPU` builds, `.addin` manifest mismatches, namespace collisions, centimeter database unit bugs, off-thread COM access, stale geometry references, and non-deterministic drawing dimensions—into reusable, task-scoped agent skills.
 
-Inventor C# development has many small failure modes that are easy to repeat across projects:
+This repository covers in-process Inventor C# Add-Ins only. It explicitly excludes MCP servers, standalone automation EXEs, AI chat/workflow architectures, and the Fusion 360 API.
 
-- the wrong .NET target for the Inventor release;
-- Any CPU instead of x64;
-- .addin manifest/GUID/path mismatches;
-- System.IO.Path vs Inventor.Path;
-- System.IO.File vs Inventor file-related objects;
-- Inventor.Application vs System.Windows.Application;
-- Inventor.Transaction vs System.Transactions.Transaction;
-- raw millimeter values passed to APIs that use centimeter database units;
-- stale Face/Edge references after model regeneration;
-- empty catch blocks hiding COM failures;
-- background Task.Run code touching live Inventor COM objects;
-- automatic drawing dimensions implemented as slow retry loops;
-- PartsList cells treated as if they were always writable model properties.
+## Highlights
 
-These skills turn those lessons into reusable implementation rules.
-
-## Compatibility
-
-### Inventor 2025 and later
-
-Autodesk moved the Inventor Add-In templates to **.NET 8** starting with Inventor 2025.
-
-Recommended baseline:
-
-- Visual Studio 2022 17.8+
-- net8.0-windows
-- x64
-- Autodesk Inventor Add-In template/SDK for the target release
-- registry-free .addin deployment
-
-### Inventor 2024 and earlier
-
-Use the framework supported by the Autodesk SDK/template for the target release.
-
-net48 is a common legacy baseline, but it should not be forced onto newer Inventor releases without validation.
-
-If one product supports both runtime generations, share core source where practical and produce target-specific Add-In builds/manifests.
-
-## How to use
-
-Start with the repository-level master skill:
-
-[SKILL.md](SKILL.md)
-
-Then load only the focused skills needed for the task.
-
-This keeps agent context small and prevents unrelated Inventor APIs from competing for attention.
-
-## Skill catalog
-
-| Skill | Purpose |
+| Highlight | Why it matters |
 | --- | --- |
-| [API map](skills/api-map/SKILL.md) | Quick Inventor object-model and interface map |
-| [Project setup](skills/project-setup/SKILL.md) | Target framework, x64, interop references, WPF, build output |
-| [Add-In lifecycle](skills/addin-lifecycle/SKILL.md) | ApplicationAddInServer, Activate, Deactivate, event lifetime |
-| [Installation and deployment](skills/installation-deployment/SKILL.md) | .addin manifest, install paths, load rules, PowerShell |
-| [COM interop and conflicts](skills/com-interop-conflicts/SKILL.md) | Path/File/Application/Point/Transaction conflicts, COM threading |
-| [Documents, units, transactions](skills/documents-units-transactions/SKILL.md) | Documents, database units, transient objects, updates, save rules |
-| [Geometry, selection, references](skills/geometry-selection-references/SKILL.md) | SelectSet, ObjectCollection, ReferenceKey, AttributeSets, proxies |
-| [Sketch modeling](skills/sketch-modeling/SKILL.md) | Work geometry, 2D sketches, constraints, profiles |
-| [Part features](skills/part-features/SKILL.md) | Extrude, revolve, sweep, loft, hole, fillet, chamfer, shell, patterns |
-| [Sheet metal](skills/sheet-metal/SKILL.md) | SheetMetalComponentDefinition, flat patterns, DXF/DWG manufacturing |
-| [Assembly](skills/assembly/SKILL.md) | Occurrences, transforms, proxies, constraints, traversal, BOM impact |
-| [Drawing sheets and tables](skills/drawing-sheets-tables/SKILL.md) | Templates, sheets, styles, title blocks, parts lists, hole/revision tables |
-| [Drawing views](skills/drawing-views/SKILL.md) | Base/projected/section/detail views, scale, layout, representations |
-| [Drawing dimensions](skills/drawing-dimensions/SKILL.md) | GeometryIntent, GeneralDimensions, automatic dimension planning |
-| [Drawing annotations](skills/drawing-annotations/SKILL.md) | Center marks, centerlines, hole/thread notes, leaders, balloons, GD&T |
-| [BOM and properties](skills/bom-properties/SKILL.md) | BOM, PartsList, iProperties, material, mass, model-state scope |
-| [Ribbon UI and events](skills/ribbon-events/SKILL.md) | Button definitions, Ribbon tabs/panels, event lifetime, WPF |
-| [Import and export](skills/import-export/SKILL.md) | TranslatorAddIn, STEP, DWG, DXF, PDF, flat-pattern export |
-| [Performance and reliability](skills/performance-reliability/SKILL.md) | COM round-trips, batching, DTO architecture, transactions, idempotency |
-| [Troubleshooting](skills/troubleshooting/SKILL.md) | Build/load/COM/modeling/drawing/BOM/deployment failure signatures |
+| Master router plus 20 focused skills | Load [`SKILL.md`](./SKILL.md) first and pull in only the domain skills needed for the current task, keeping agent context small and preventing unrelated APIs from competing for attention. |
+| Dual runtime baseline coverage | Separates Inventor 2025+ (`.NET 8` / `net8.0-windows`, Visual Studio 2022 17.8+) from Inventor 2024 and earlier (`net48` or release-matched SDK target) so projects do not force the wrong runtime. |
+| COM interop and namespace guardrails | Enforces explicit aliases for conflicting types (`System.IO.Path` vs `Inventor.Path`, `Inventor.Application` vs `System.Windows.Application`), main-thread COM discipline, and structured HRESULT logging with no empty `catch` blocks. |
+| Deterministic modeling and drawing rules | Promotes single-pass COM extraction into plain C# DTOs, semantic identity (`AttributeSets`, `ReferenceKey`) over fragile collection indexes, and deterministic automatic drawing dimension pipelines. |
+| Registry-free deployment and diagnostics | Documents supported Windows `.addin` manifest locations, PowerShell string-interpolation traps, and failure-signature troubleshooting across build, load, COM, BOM, and deployment stages. |
 
-## Typical skill combinations
+## Architecture
 
-### Build an Inventor Add-In
+[`SKILL.md`](./SKILL.md) acts as the repository-level master router that establishes mandatory rules and dispatches tasks to 20 focused skills organized under `skills/`:
 
-Load:
+```text
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                         Master Skill (SKILL.md)                                │
+│    Scope Guard | Mandatory Rules | Version Baseline | Task-to-Skill Router     │
+└───────────────────────────────────────┬────────────────────────────────────────┘
+                                        │ load only task-relevant skills
+                                        ▼
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                          skills/ (20 Focused Skills)                           │
+│                                                                                │
+│  ┌───────────────────────────────────┐  ┌───────────────────────────────────┐  │
+│  │ Add-In Foundation & Interop       │  │ Core Modeling & Assemblies        │  │
+│  │ - api-map                         │  │ - documents-units-transactions    │  │
+│  │ - project-setup                   │  │ - geometry-selection-references   │  │
+│  │ - addin-lifecycle                 │  │ - sketch-modeling                 │  │
+│  │ - installation-deployment         │  │ - part-features                   │  │
+│  │ - ribbon-events                   │  │ - sheet-metal                     │  │
+│  │ - com-interop-conflicts           │  │ - assembly                        │  │
+│  └───────────────────────────────────┘  └───────────────────────────────────┘  │
+│                                                                                │
+│  ┌───────────────────────────────────┐  ┌───────────────────────────────────┐  │
+│  │ Drawings & Annotations            │  │ Data, I/O & Reliability           │  │
+│  │ - drawing-sheets-tables           │  │ - bom-properties                  │  │
+│  │ - drawing-views                   │  │ - import-export                   │  │
+│  │ - drawing-dimensions              │  │ - performance-reliability         │  │
+│  │ - drawing-annotations             │  │ - troubleshooting                 │  │
+│  └───────────────────────────────────┘  └───────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────────────┘
+```
 
-- SKILL.md
-- project-setup
-- addin-lifecycle
-- installation-deployment
-- ribbon-events
-- com-interop-conflicts
+## Quick Install
 
-### Create a parametric part
+Clone the repository locally so your coding agent or workspace can reference [`SKILL.md`](./SKILL.md) and the focused skill files under `skills/`:
 
-Load:
+```bash
+git clone https://github.com/zly258/inventor-dev-skills.git
+```
 
-- SKILL.md
-- documents-units-transactions
-- geometry-selection-references
-- sketch-modeling
-- part-features
+Prerequisites for target Inventor Add-In projects:
 
-### Create an assembly command
+- Windows (`x64`) with Autodesk Inventor and the matching Inventor Add-In SDK/template installed.
+- **Inventor 2025 and later:** Visual Studio 2022 17.8+, `net8.0-windows`, `x64`, registry-free `.addin` deployment.
+- **Inventor 2024 and earlier:** the .NET framework supported by the target release's Autodesk SDK/template (commonly `net48`).
 
-Load:
+## Quick Start
 
-- SKILL.md
-- documents-units-transactions
-- geometry-selection-references
-- assembly
+1. Load the repository-level master skill [`SKILL.md`](./SKILL.md) first so scope boundaries and mandatory engineering rules are active.
+2. Add only the focused skills required for your task. Typical combinations:
 
-### Automatically create a manufacturing drawing
+| Goal | Skills to load alongside `SKILL.md` |
+| --- | --- |
+| Build a new Inventor Add-In | `project-setup`, `addin-lifecycle`, `installation-deployment`, `ribbon-events`, `com-interop-conflicts` |
+| Create a parametric part | `documents-units-transactions`, `geometry-selection-references`, `sketch-modeling`, `part-features` |
+| Create an assembly command | `documents-units-transactions`, `geometry-selection-references`, `assembly` |
+| Automate a manufacturing drawing | `drawing-sheets-tables`, `drawing-views`, `drawing-dimensions`, `drawing-annotations`, `bom-properties`, `performance-reliability` |
+| Diagnose a loader or build failure | `project-setup`, `addin-lifecycle`, `installation-deployment`, `com-interop-conflicts`, `troubleshooting` |
 
-Load:
+3. Before editing an existing Add-In project, verify the target Inventor version, target framework, `x64` build configuration, interop reference, `AddInServer` GUID, `.addin` manifest, and deploy directory.
+4. Before marking work complete, verify a clean `x64` build with no new warnings, clean Add-In loading on Inventor startup, wrong-document-type handling, transaction rollback on failure, and idempotent reruns.
 
-- SKILL.md
-- drawing-sheets-tables
-- drawing-views
-- drawing-dimensions
-- drawing-annotations
-- bom-properties
-- performance-reliability
+## Compatibility and Core Rules
 
-### Diagnose a loader/build failure
+### Runtime compatibility
 
-Load:
+- **Inventor 2025+:** Autodesk moved Inventor Add-In templates to `.NET 8` (`net8.0-windows`). Build `x64` and deploy via registry-free `.addin` manifests.
+- **Inventor 2024 and earlier:** Follow the Autodesk SDK/template framework for that release (`net48` is a common legacy baseline; do not force it onto newer releases without validation).
+- **Multi-generation support:** Share core source where practical and produce target-specific Add-In builds and manifests.
 
-- SKILL.md
-- project-setup
-- addin-lifecycle
-- installation-deployment
-- com-interop-conflicts
-- troubleshooting
+### Explicit aliases for conflicting types
 
-## High-value rules
+Qualify high-frequency collisions between `System.*`, WPF, and `Inventor.*`:
 
-### Use explicit names for conflicting types
-
-~~~csharp
+```csharp
 using IOPath = System.IO.Path;
 using IOFile = System.IO.File;
 using InventorPath = Inventor.Path;
 using InventorApplication = Inventor.Application;
 using WpfApplication = System.Windows.Application;
 using InventorTransaction = Inventor.Transaction;
-~~~
+```
 
-Use System.IO.Path for filesystem paths and Inventor.Path for modeling/sweep paths.
+Use `System.IO.Path` for filesystem paths and `Inventor.Path` for modeling or sweep paths.
 
 ### Keep Inventor COM objects on the Inventor thread
 
-Do not do this:
+Do not access live Inventor COM objects inside `Task.Run`:
 
-~~~csharp
+```csharp
+// Avoid
 await Task.Run(() => part.ComponentDefinition.Features.Count);
-~~~
+```
 
-Instead:
+Instead, follow the four-step extraction pipeline:
 
-1. read Inventor state on the Inventor thread;
-2. convert it into plain C# DTOs;
-3. perform pure computation off-thread if useful;
-4. return to the Inventor context for mutations.
+1. Read Inventor state on the Inventor thread.
+2. Convert it into plain C# DTOs.
+3. Perform pure computation off-thread if useful.
+4. Return to the Inventor context to apply mutations.
 
 ### Respect database units
 
-Inventor database units include:
+Inventor database units use **centimeter** for length, **radian** for angle, and **kilogram** for mass—regardless of document UI display units. Convert via `UnitsOfMeasure` at API boundaries.
 
-- length: centimeter;
-- angle: radian;
-- mass: kilogram.
+### Deterministic automatic drawing dimensions
 
-Use UnitsOfMeasure at API boundaries.
+Avoid unbounded candidate-pool retry loops. Use a deterministic single-pass pipeline:
 
-### Automatic drawing dimensions should be deterministic
-
-Recommended architecture:
-
-~~~text
+```text
 extract drawing geometry once
     -> normalize DTOs
     -> generate semantic required dimensions
@@ -192,68 +145,77 @@ extract drawing geometry once
     -> resolve spacing/collisions
     -> create dimensions once
     -> validate
-~~~
+```
 
-Do not use unbounded candidate-pool retries.
+For a stepped shaft, detect shoulder stations from drawing geometry, create each adjacent section length, then create one overall length dimension.
 
-For a stepped shaft, detect shoulder stations from the drawing geometry, create each adjacent section length, then create one overall length dimension.
+### Error handling and data-layer separation
 
-### Do not hide COM failures
+- **No empty `catch` blocks:** Always record the API operation, `HRESULT`, document, semantic entity, and key inputs when an Inventor call fails.
+- **Separate model data from drawing presentation:** Material, calculated mass, assembly BOM, drawing `PartsList`, and cell overrides are distinct layers; a visible table cell is not automatically a writable source property.
 
-Empty catch blocks are prohibited.
+### Registry-free `.addin` deployment
 
-Capture:
+Common supported deployment locations on Windows:
 
-- API operation;
-- HRESULT;
-- document;
-- semantic entity;
-- important inputs.
-
-### Keep model data and drawing presentation separate
-
-Material, calculated mass, assembly BOM, drawing PartsList, and cell overrides are different layers.
-
-A visible table cell is not automatically a writable source property.
-
-## Deployment notes
-
-Autodesk recommends registry-free .addin deployment.
-
-Common supported locations include:
-
-- %ALLUSERSPROFILE%\Autodesk\Inventor Addins\
-- %PROGRAMFILES%\Autodesk\Inventor 20xx\Bin\Addins\ for version-dependent all-user manifests on Inventor 2024+
-- %APPDATA%\Autodesk\Inventor 20xx\Addins\
-- %APPDATA%\Autodesk\ApplicationPlugins
+- `%ALLUSERSPROFILE%\Autodesk\Inventor Addins\`
+- `%PROGRAMFILES%\Autodesk\Inventor 20xx\Bin\Addins\` (version-dependent all-user manifests on Inventor 2024+)
+- `%APPDATA%\Autodesk\Inventor 20xx\Addins\`
+- `%APPDATA%\Autodesk\ApplicationPlugins`
 
 A simple per-user version-specific deployment can keep the manifest, Add-In DLL, and managed dependencies in one flat product directory.
 
-The deployment skill also documents the PowerShell interpolation trap:
+When writing PowerShell deployment scripts, brace variables that precede a colon:
 
-~~~powershell
+```powershell
 # Wrong
 throw "Deployment validation failed for Inventor $version: $required"
 
 # Correct
 throw "Deployment validation failed for Inventor ${version}: $required"
-~~~
+```
 
-## Official Autodesk references
+## Documentation
 
-- Inventor 2026 API Help: https://help.autodesk.com/view/INVNTOR/2026/ENU/
-- Creating an Add-In: https://help.autodesk.com/cloudhelp/2026/ENU/Inventor-API/files/CreatingAnAddIn_Overview.htm
-- ApplicationAddInServer: https://help.autodesk.com/cloudhelp/2023/ENU/Inventor-API/files/ApplicationAddInServer.htm
-- PartComponentDefinition: https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-API/files/PartComponentDefinition.htm
-- DrawingViews: https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-API/files/DrawingViews.htm
-- GeneralDimensions: https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-API/files/GeneralDimensions.htm
-- UnitsOfMeasure: https://help.autodesk.com/cloudhelp/2023/ENU/Inventor-API/files/UnitsOfMeasure.htm
-- TranslatorAddIn: https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-API/files/TranslatorAddIn.htm
+### Skill catalog
+
+| Topic | What it covers | Link |
+| --- | --- | --- |
+| Master router | Scope boundaries, mandatory rules, version baseline, task routing | [SKILL.md](./SKILL.md) |
+| API map | Quick Inventor object-model and interface entry points | [skills/api-map/SKILL.md](./skills/api-map/SKILL.md) |
+| Project setup | Target framework, `x64`, interop references, WPF, build output | [skills/project-setup/SKILL.md](./skills/project-setup/SKILL.md) |
+| Add-In lifecycle | `ApplicationAddInServer`, `Activate`, `Deactivate`, event lifetime | [skills/addin-lifecycle/SKILL.md](./skills/addin-lifecycle/SKILL.md) |
+| Installation and deployment | `.addin` manifest, install paths, load rules, PowerShell | [skills/installation-deployment/SKILL.md](./skills/installation-deployment/SKILL.md) |
+| COM interop and conflicts | `Path`/`File`/`Application`/`Point`/`Transaction` conflicts, COM threading | [skills/com-interop-conflicts/SKILL.md](./skills/com-interop-conflicts/SKILL.md) |
+| Documents, units, transactions | Documents, database units, transient objects, updates, save rules | [skills/documents-units-transactions/SKILL.md](./skills/documents-units-transactions/SKILL.md) |
+| Geometry, selection, references | `SelectSet`, `ObjectCollection`, `ReferenceKey`, `AttributeSets`, proxies | [skills/geometry-selection-references/SKILL.md](./skills/geometry-selection-references/SKILL.md) |
+| Sketch modeling | Work geometry, 2D sketches, constraints, profiles | [skills/sketch-modeling/SKILL.md](./skills/sketch-modeling/SKILL.md) |
+| Part features | Extrude, revolve, sweep, loft, hole, fillet, chamfer, shell, patterns | [skills/part-features/SKILL.md](./skills/part-features/SKILL.md) |
+| Sheet metal | `SheetMetalComponentDefinition`, flat patterns, DXF/DWG manufacturing | [skills/sheet-metal/SKILL.md](./skills/sheet-metal/SKILL.md) |
+| Assembly | Occurrences, transforms, proxies, constraints, traversal, BOM impact | [skills/assembly/SKILL.md](./skills/assembly/SKILL.md) |
+| Drawing sheets and tables | Templates, sheets, styles, title blocks, parts lists, hole/revision tables | [skills/drawing-sheets-tables/SKILL.md](./skills/drawing-sheets-tables/SKILL.md) |
+| Drawing views | Base, projected, section, auxiliary, and detail views, scale, layout | [skills/drawing-views/SKILL.md](./skills/drawing-views/SKILL.md) |
+| Drawing dimensions | `GeometryIntent`, `GeneralDimensions`, deterministic dimension planning | [skills/drawing-dimensions/SKILL.md](./skills/drawing-dimensions/SKILL.md) |
+| Drawing annotations | Center marks, centerlines, hole/thread notes, leaders, balloons, GD&T | [skills/drawing-annotations/SKILL.md](./skills/drawing-annotations/SKILL.md) |
+| BOM and properties | BOM, `PartsList`, iProperties, material, mass, model-state scope | [skills/bom-properties/SKILL.md](./skills/bom-properties/SKILL.md) |
+| Ribbon UI and events | Button definitions, Ribbon tabs/panels, event lifetime, WPF | [skills/ribbon-events/SKILL.md](./skills/ribbon-events/SKILL.md) |
+| Import and export | `TranslatorAddIn`, STEP, DWG, DXF, PDF, flat-pattern export | [skills/import-export/SKILL.md](./skills/import-export/SKILL.md) |
+| Performance and reliability | COM round-trips, batching, DTO architecture, transactions, idempotency | [skills/performance-reliability/SKILL.md](./skills/performance-reliability/SKILL.md) |
+| Troubleshooting | Build, load, COM, modeling, drawing, BOM, and deployment failure signatures | [skills/troubleshooting/SKILL.md](./skills/troubleshooting/SKILL.md) |
+
+### Official Autodesk references
+
+- [Inventor 2026 API Help](https://help.autodesk.com/view/INVNTOR/2026/ENU/)
+- [Creating an Add-In](https://help.autodesk.com/cloudhelp/2026/ENU/Inventor-API/files/CreatingAnAddIn_Overview.htm)
+- [ApplicationAddInServer](https://help.autodesk.com/cloudhelp/2023/ENU/Inventor-API/files/ApplicationAddInServer.htm)
+- [PartComponentDefinition](https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-API/files/PartComponentDefinition.htm)
+- [DrawingViews](https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-API/files/DrawingViews.htm)
+- [GeneralDimensions](https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-API/files/GeneralDimensions.htm)
+- [UnitsOfMeasure](https://help.autodesk.com/cloudhelp/2023/ENU/Inventor-API/files/UnitsOfMeasure.htm)
+- [TranslatorAddIn](https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-API/files/TranslatorAddIn.htm)
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
-
-## Disclaimer
+Licensed under the Apache License 2.0. See [LICENSE](./LICENSE).
 
 Autodesk and Inventor are trademarks of Autodesk, Inc. This repository is an independent developer resource and is not affiliated with or endorsed by Autodesk.
